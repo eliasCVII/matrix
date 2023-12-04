@@ -8,11 +8,16 @@ from sympy import Matrix, Rational, eye, symbols
 
 console = Console()
 
+
 def mensaje_padding(message):
+    """
+    Colorear mensajes
+    """
     theme = "italic blue on white"
     length = len(message)
     mensaje = Padding(f"> {message}", (0, 15), style=theme, expand=False)
     return mensaje
+
 
 def input_positive_integer(prompt):
     while True:
@@ -31,13 +36,14 @@ def input_positive_integer(prompt):
             text.append("Porfavor ingrese un numero", style="red")
             console.print(text)
 
+
 def input_matrix():
     rows = input_positive_integer("- numero de filas")
     cols = input_positive_integer("- numero de columnas")
 
     # Initialize the matrix with empty strings
     a = symbols("_")
-    matrix = [[a]*cols for _ in range(rows)]
+    matrix = [[a] * cols for _ in range(rows)]
     x = Matrix(matrix)
     console.clear()
     console.print(f"\nSu matriz ({rows}x{cols}):", style="white on blue")
@@ -52,8 +58,10 @@ def input_matrix():
                     matrix[i][j] = Rational(int(val))
                     x = Matrix(matrix)
                     console.clear()
-                    console.print(f"\nSu matriz ({rows}x{cols}):", style="white on blue")
-                    print_matrix(x, highlight_pos=(i,j))
+                    console.print(
+                        f"\nSu matriz ({rows}x{cols}):", style="white on blue"
+                    )
+                    print_matrix(x, highlight_pos=(i, j))
                     break
                 else:
                     console.print("Porfavor ingrese un numero.", style="red")
@@ -64,8 +72,10 @@ def input_matrix():
 
     return x
 
+
 def calculate_rank(x):
     return x.rank()
+
 
 def print_matrix(x, affected_rows=None, is_augmented=False, highlight_pos=None):
     if isinstance(x, list):
@@ -85,16 +95,20 @@ def print_matrix(x, affected_rows=None, is_augmented=False, highlight_pos=None):
         for j, val in enumerate(row):
             if is_augmented and j == m:
                 row_str.append("|")
-            if highlight_pos and highlight_pos == (i,j):
+            if highlight_pos and highlight_pos == (i, j):
                 color = "orange"
             row_str.append(f"[{color}]{val.rjust(max_widths[j])}[/{color}]")
         # console.print("[" + ", ".join(row_str) + "]")
-        console.print("[" + ", ".join(row_str).replace("|," , "|") + "]")  # Add a separator between the elements
+        console.print(
+            "[" + ", ".join(row_str).replace("|,", "|") + "]"
+        )  # Add a separator between the elements
+
 
 def multiply_matrix(x, y):
     if x.shape[1] != y.shape[0]:
         return 0
     return x * y
+
 
 def escalonar_simple(x):
     m, n = x.shape
@@ -133,11 +147,13 @@ def escalonar_simple(x):
     print("\n# El rango de la matriz escalonada es:", rango)
     return x
 
+
 def gauss_jordan_inverse(a):
+    """
+    Inverse a matrix and return the right augmented matrix
+    """
     m, n = a.shape
     x = a.copy()
-    # Convert the matrix to fractions
-    #x = Matrix([[Rational(val) for val in row] for row in x.tolist()])
 
     # Augment the matrix with the identity matrix
     x = x.row_join(eye(m))
@@ -156,34 +172,34 @@ def gauss_jordan_inverse(a):
                     print(f"\n# Intercambie fila {i+1} con fila {j+1}")
                     print_matrix(x, affected_rows=[i], is_augmented=True)
                     break
+
         for j in range(i + 1, m):
             k = (-1) * x[j, i] / x[i, i]
-            x[j, :] = x[j, :] + k * x[i, :]
-
-            print(f"\n# Sume {k} veces fila {i+1} a la fila {j+1}")
-            print_matrix(x, affected_rows=[j], is_augmented=True)
+            if k != 0:
+                x[j, :] = x[j, :] + k * x[i, :]
+                print(f"\n# Sume {k} veces fila {i+1} a la fila {j+1}")
+                print_matrix(x, affected_rows=[j], is_augmented=True)
 
     for i in range(m - 1, -1, -1):
         for j in range(i - 1, -1, -1):
             k = (-1) * x[j, i] / x[i, i]
-            x[j, :] = x[j, :] + k * x[i, :]
-
-            print(f"\n# Sume {k} veces fila {i+1}  a la fila {j+1}")
-            print_matrix(x, affected_rows=[j], is_augmented=True)
+            if k != 0:
+                x[j, :] = x[j, :] + k * x[i, :]
+                print(f"\n# Sume {k} veces fila {i+1}  a la fila {j+1}")
+                print_matrix(x, affected_rows=[j], is_augmented=True)
 
     for i in range(m):
         scalar = x[i, i]
         x[i, :] = x[i, :] / scalar
 
-        print(f"\n# Multiplique la fila {i+1} por {1/scalar} para hacer el 1")
+        print(f"\n# Multiplique la fila {i+1} por {scalar**-1} para hacer el 1")
         print_matrix(x, affected_rows=[i], is_augmented=True)
 
     return x[:, m:]
 
+
 def row_echelon_form(a, solve_system=False):
     m, n = a.shape
-    # Convert the matrix to fractions
-    #x = Matrix([[Rational(val) for val in row] for row in x.tolist()])
     x = a.copy()
 
     print("\n# Matriz original")
@@ -237,7 +253,8 @@ def row_echelon_form(a, solve_system=False):
             else:
                 console.print(f"- x_{i+1} es una variable libre")
 
-    #return x
+    # return x
+
 
 def input_augmented_matrix(matrix):
     rows, cols = matrix.shape
@@ -247,7 +264,7 @@ def input_augmented_matrix(matrix):
 
     # Input the augmented matrix
     a = symbols("_")
-    augmented_matrix = [a]*rows
+    augmented_matrix = [a] * rows
     matrix = matrix.row_join(Matrix(augmented_matrix))
     print_matrix(matrix, is_augmented=True)
 
@@ -257,15 +274,16 @@ def input_augmented_matrix(matrix):
             if not val.lstrip("-").isdigit():
                 symbol = symbols(val)
                 augmented_matrix[i] = symbol
-            else: #val.lstrip("-").isdigit():
+            else:  # val.lstrip("-").isdigit():
                 augmented_matrix[i] = Rational(int(val))
-            matrix = matrix[:,:-1].row_join(Matrix(augmented_matrix))
+            matrix = matrix[:, :-1].row_join(Matrix(augmented_matrix))
             console.clear()
             console.print(mensaje)
             print_matrix(matrix, is_augmented=True, affected_rows=[i])
             break
 
     return matrix
+
 
 def print_matrix_and_inverse(x):
     # Calculate the inverse of the matrix
@@ -302,6 +320,7 @@ def print_matrix_and_inverse(x):
                 "[" + ", ".join(row_x) + "]     [" + ", ".join(row_inverse) + "]"
             )
 
+
 def print_matrices_side_by_side(x, y):
     # Convert the matrices to lists
     x_list = x.tolist()
@@ -322,6 +341,7 @@ def print_matrices_side_by_side(x, y):
             print(f"{y_row}")
         else:
             print()
+
 
 def matrix_from_file(theme_2):
     console.clear()
@@ -349,6 +369,7 @@ def matrix_from_file(theme_2):
     print_matrix(x)
 
     return x
+
 
 def main():
     console.clear()
@@ -385,14 +406,13 @@ def main():
             print("1. Escalonar matriz")
             print("2. Buscar la inversa de la matriz")
             print("3. Resolver sistema")
-            print("4. Multiplicar matriz")
-            print("5. Volver al menu principal")
+            print("4. Volver al menu principal")
 
             operation_choice = Prompt.ask(
-                "Elija una opcion", choices=["1", "2", "3", "4", "5"]
+                "Elija una opcion", choices=["1", "2", "3", "4"]
             )
 
-            if operation_choice == "5":  # Salir
+            if operation_choice == "4":  # Salir
                 break
 
             elif operation_choice == "1":
@@ -422,28 +442,33 @@ def main():
                 x = input_augmented_matrix(x)
                 row_echelon_form(x, solve_system=True)
 
-            elif operation_choice == "4":
-                console.clear()
-                print("Ingrese su otra matriz\n")
-                print("1. Insertar matriz manualmente")
-                print("2. Leer matrices desde archivo")
-                choice = Prompt.ask("Elija una opcion", choices=["1", "2"])
+            # elif operation_choice == "4":
+            #     console.clear()
+            #     print("Ingrese su otra matriz\n")
+            #     print("1. Insertar matriz manualmente")
+            #     print("2. Leer matrices desde archivo")
+            #     choice = Prompt.ask("Elija una opcion", choices=["1", "2"])
+            #
+            #     if choice == "1":
+            #         y = input_matrix()
+            #     elif choice == "2":
+            #         y = matrix_from_file(theme_2)
+            #
+            #     if multiply_matrix(x, y) == 0:
+            #         console.print(
+            #             Text.assemble(
+            #                 ("No", "red"),
+            #                 " se pueden multiplicar!",
+            #             )
+            #         )
+            #     else:
+            #         new_matrix = multiply_matrix(x, y)
+            #         print_matrices_side_by_side(x, y)
+            #         print("\n# Resultado final:\n")
+            #         print_matrix(new_matrix)
+            #
 
-                if choice == "1":
-                    y = input_matrix()
-                elif choice == "2":
-                    y = matrix_from_file(theme_2)
-
-                if multiply_matrix(x,y) == 0:
-                    console.print(
-                        Text.assemble(("No", "red")," se pueden multiplicar!",
-                        )
-                    )
-                else:
-                    new_matrix = multiply_matrix(x,y)
-                    print_matrices_side_by_side(x,y)
-                    print("\n# Resultado final:\n")
-                    print_matrix(new_matrix)
 
 if __name__ == "__main__":
     main()
+
