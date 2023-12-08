@@ -8,6 +8,7 @@ from sympy import Matrix, Rational, eye, symbols
 
 console = Console()
 
+
 def mensaje_padding(message):
     """
     Colorear mensajes
@@ -71,8 +72,10 @@ def input_matrix():
 
     return x
 
+
 def calculate_rank(x):
     return x.rank()
+
 
 def print_matrix(x, affected_rows=None, is_augmented=False, highlight_pos=None):
     if isinstance(x, list):
@@ -440,5 +443,7 @@ def main():
                 x = input_augmented_matrix(x)
                 row_echelon_form(x, solve_system=True)
 
+
 if __name__ == "__main__":
     main()
+
