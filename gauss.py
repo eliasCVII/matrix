@@ -4,7 +4,7 @@ from rich import print
 from rich.console import Console
 from rich.padding import Padding
 from rich.prompt import *
-from sympy import Matrix, Rational, eye, symbols, Eq, solve, linear_eq_to_matrix
+from sympy import Matrix, Rational, eye, symbols
 
 console = Console()
 
@@ -71,10 +71,8 @@ def input_matrix():
 
     return x
 
-
 def calculate_rank(x):
     return x.rank()
-
 
 def print_matrix(x, affected_rows=None, is_augmented=False, highlight_pos=None):
     if isinstance(x, list):
@@ -108,42 +106,6 @@ def multiply_matrix(x, y):
         return 0
     return x * y
 
-
-def equations_to_matrix(theme_2):
-    # Ask the user for the number of equations
-
-    console.clear()
-    num_equations = int(input("Enter the number of equations: "))
-
-    equations = []
-    symbols_set = set()
-
-    # Input each equation
-    for i in range(num_equations):
-        equation = input(f"Enter equation {i+1}: ")
-        print(f"{i+1}. {equation}")
-        # Parse the equation
-        left, right = equation.split("=")
-        left_terms = left.split("+")
-        for term in left_terms:
-            if term.strip()[0].isalpha():  # Check if the term starts with a letter
-                symbols_set.add(term.strip()[0])  # Add the variable to the set of symbols
-        equations.append(Eq(symbols(left), float(right)))
-
-    # Create a list of symbols in the equations
-    symbols_list = symbols(','.join(symbols_set))
-
-    # Convert the equations to a matrix
-    A, b = linear_eq_to_matrix(equations, symbols_list)
-
-    # Combine the matrix and the augmented matrix
-    x = A.row_join(b)
-
-    console.clear()
-    console.print(f"Su matriz ({x.shape[0]}x{x.shape[1]}):", style=theme_2)
-    print_matrix(x)
-
-    return x
 
 def escalonar_simple(x):
     m, n = x.shape
@@ -432,9 +394,6 @@ def main():
         elif choice == "2":
             x = matrix_from_file(theme_2)
 
-        # elif choice == "3":
-        #     x = equations_to_matrix(theme_2)
-
         else:
             print("Opcion invalida")
             continue
@@ -481,33 +440,5 @@ def main():
                 x = input_augmented_matrix(x)
                 row_echelon_form(x, solve_system=True)
 
-            # elif operation_choice == "4":
-            #     console.clear()
-            #     print("Ingrese su otra matriz\n")
-            #     print("1. Insertar matriz manualmente")
-            #     print("2. Leer matrices desde archivo")
-            #     choice = Prompt.ask("Elija una opcion", choices=["1", "2"])
-            #
-            #     if choice == "1":
-            #         y = input_matrix()
-            #     elif choice == "2":
-            #         y = matrix_from_file(theme_2)
-            #
-            #     if multiply_matrix(x, y) == 0:
-            #         console.print(
-            #             Text.assemble(
-            #                 ("No", "red"),
-            #                 " se pueden multiplicar!",
-            #             )
-            #         )
-            #     else:
-            #         new_matrix = multiply_matrix(x, y)
-            #         print_matrices_side_by_side(x, y)
-            #         print("\n# Resultado final:\n")
-            #         print_matrix(new_matrix)
-            #
-
-
 if __name__ == "__main__":
     main()
-
