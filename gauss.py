@@ -41,7 +41,7 @@ def input_matrix():
     rows = input_positive_integer("- numero de filas")
     cols = input_positive_integer("- numero de columnas")
 
-    # Initialize the matrix with empty strings
+    # matriz rellena con "_"
     a = symbols("_")
     matrix = [[a] * cols for _ in range(rows)]
     x = Matrix(matrix)
@@ -85,7 +85,7 @@ def print_matrix(x, affected_rows=None, is_augmented=False, highlight_pos=None):
         m, n = x.shape
         x = [[str(val) for val in row] for row in x.tolist()]
 
-    # Find the maximum width of the numbers in each column
+    # buscar el ancho de cada fila
     max_widths = [max(len(x[i][j]) for i in range(m)) for j in range(n)]
 
     for i in range(m):
@@ -99,9 +99,7 @@ def print_matrix(x, affected_rows=None, is_augmented=False, highlight_pos=None):
                 color = "orange"
             row_str.append(f"[{color}]{val.rjust(max_widths[j])}[/{color}]")
         # console.print("[" + ", ".join(row_str) + "]")
-        console.print(
-            "[" + ", ".join(row_str).replace("|,", "|") + "]"
-        )  # Add a separator between the elements
+        console.print("[" + ", ".join(row_str).replace("|,", "|") + "]")
 
 
 def multiply_matrix(x, y):
@@ -110,64 +108,65 @@ def multiply_matrix(x, y):
     return x * y
 
 
-def escalonar_simple(x):
-    m, n = x.shape
-    # Convert the matrix to fractions
-    x = Matrix([[Rational(val) for val in row] for row in x.tolist()])
-
-    print("# Matriz original")
-    print_matrix(x)
-
-    i = 0
-    while i < min(m, n):
-        # Check for zero pivot element
-        if x[i, i] == 0:
-            # Find a row below with non-zero element in the same column
-            for j in range(i + 1, m):
-                if x[j, i] != 0:
-                    # Swap rows
-                    x.row_swap(i, j)
-                    print(f"\n# Intercambie fila {i+1} con la fila {j+1}")
-                    print_matrix(x)
-
-            else:
-                i += 1
-                continue
-        for j in range(i + 1, m):
-            k = (-1) * x[j, i] / x[i, i]
-            if k != 0:
-                x[j, :] = x[j, :] + k * x[i, :]
-                print(f"\n# Sume {k} veces fila {i+1} a la fila {j+1}")
-                print_matrix(x, affected_rows=[j])
-        i += 1
-
-    rango = calculate_rank(x)
-    console.print("\n# Matriz escalonada:", style="italic white on blue")
-    print_matrix(x)
-    print("\n# El rango de la matriz escalonada es:", rango)
-    return x
+# def escalonar_simple(x):
+#     m, n = x.shape
+#     # Convert the matrix to fractions
+#     x = Matrix([[Rational(val) for val in row] for row in x.tolist()])
+#
+#     print("# Matriz original")
+#     print_matrix(x)
+#
+#     i = 0
+#     while i < min(m, n):
+#         # Check for zero pivot element
+#         if x[i, i] == 0:
+#             # Find a row below with non-zero element in the same column
+#             for j in range(i + 1, m):
+#                 if x[j, i] != 0:
+#                     # Swap rows
+#                     x.row_swap(i, j)
+#                     print(f"\n# Intercambie fila {i+1} con la fila {j+1}")
+#                     print_matrix(x)
+#
+#             else:
+#                 i += 1
+#                 continue
+#         for j in range(i + 1, m):
+#             k = (-1) * x[j, i] / x[i, i]
+#             if k != 0:
+#                 x[j, :] = x[j, :] + k * x[i, :]
+#                 print(f"\n# Sume {k} veces fila {i+1} a la fila {j+1}")
+#                 print_matrix(x, affected_rows=[j])
+#         i += 1
+#
+#     rango = calculate_rank(x)
+#     console.print("\n# Matriz escalonada:", style="italic white on blue")
+#     print_matrix(x)
+#     print("\n# El rango de la matriz escalonada es:", rango)
+#     return x
 
 
 def gauss_jordan_inverse(a):
     """
-    Inverse a matrix and return the right augmented matrix
+    Buscamos la inversa de la matriz
     """
     m, n = a.shape
     x = a.copy()
 
-    # Augment the matrix with the identity matrix
+    # Creamos la matriz aumentada
     x = x.row_join(eye(m))
 
-    print("# Matriz ampliada:")
+    console.clear()
+    print("\n# Matriz ampliada:")
     print_matrix(x, is_augmented=True)
 
     for i in range(min(m, n)):
-        # Check for zero pivot element
+        # Buscando ceros en los pivotes
         if x[i, i] == 0:
-            # Find a row below with non-zero element in the same column
+            # Intercambia con una fila sin pivote=0
             for j in range(i + 1, m):
                 if x[j, i] != 0:
-                    # Swap rows
+                    # intercambio
                     x.row_swap(i, j)
                     print(f"\n# Intercambie fila {i+1} con fila {j+1}")
                     print_matrix(x, affected_rows=[i], is_augmented=True)
@@ -177,7 +176,8 @@ def gauss_jordan_inverse(a):
             k = (-1) * x[j, i] / x[i, i]
             if k != 0:
                 x[j, :] = x[j, :] + k * x[i, :]
-                print(f"\n# Sume {k} veces fila {i+1} a la fila {j+1}")
+                print(f"\n# f{j+1} = f{j+1} + ({k})f{i+1}")
+                # print("\n# Sume {k} veces fila {i+1} a la fila {j+1}")
                 print_matrix(x, affected_rows=[j], is_augmented=True)
 
     for i in range(m - 1, -1, -1):
@@ -185,14 +185,16 @@ def gauss_jordan_inverse(a):
             k = (-1) * x[j, i] / x[i, i]
             if k != 0:
                 x[j, :] = x[j, :] + k * x[i, :]
-                print(f"\n# Sume {k} veces fila {i+1}  a la fila {j+1}")
+                # print(f"\n# Sume {k} veces fila {i+1}  a la fila {j+1}")
+                print(f"\n# f{j+1} = f{j+1} + ({k})f{i+1}")
                 print_matrix(x, affected_rows=[j], is_augmented=True)
 
     for i in range(m):
+        # hacer el pivote = 1
         scalar = x[i, i]
         x[i, :] = x[i, :] / scalar
-
-        print(f"\n# Multiplique la fila {i+1} por {scalar**-1} para hacer el 1")
+        # print(f"\n# Multiplique la fila {i+1} por {scalar**-1}")
+        print(f"\n# f{i+1} = ({scalar**-1})f{i+1}")
         print_matrix(x, affected_rows=[i], is_augmented=True)
 
     return x[:, m:]
@@ -207,12 +209,12 @@ def row_echelon_form(a, solve_system=False):
 
     i = 0
     while i < min(m, n):
-        # Check for zero pivot element
+        # Buscando ceros en los pivotes
         if x[i, i] == 0:
-            # Find a row below with non-zero element in the same column
+            # intercambio de filas
             for j in range(i + 1, m):
                 if x[j, i] != 0:
-                    # Swap rows
+                    # intercambiamos
                     x.row_swap(i, j)
                     print(f"\n# Intercambie fila {i+1} con fila {j+1}")
                     print_matrix(x, affected_rows=[i])
@@ -221,21 +223,22 @@ def row_echelon_form(a, solve_system=False):
                 i += 1
                 continue
 
-        # Make pivot a one
+        # Hacer el pivote 1
         pivot = x[i, i]
-        if pivot != 1:  # Skip if pivot is 1
+        if pivot != 1:  # salatar si ya es 1
             x[i, :] = x[i, :] / pivot
-            print(f"\n# Multiplique la fila {i+1} por {pivot**-1} para hacer el 1")
+            print(f"\n# f{i+1} = ({pivot**-1})f{i+1}")
+            # print(f"\n# Multiplique la fila {i+1} por {pivot**-1}")
             print_matrix(x, affected_rows=[i])
 
         for j in range(m):
-            if j != i and not all(
-                x[j, k] == 0 for k in range(n)
-            ):  # Skip if row is all zeros or current row
+            # saltar paso si hay 0
+            if j != i and not all(x[j, k] == 0 for k in range(n)):
                 k = (-1) * x[j, i] / x[i, i]
-                if k != 0:  # Skip if scalar is zero
+                if k != 0:
                     x[j, :] = x[j, :] + k * x[i, :]
-                    print(f"\n# Sume {k} veces fila {i+1} a la fila {j+1}")
+                    print(f"\n# f{j+1} = f{j+1} + ({k})f{i+1}")
+                    # print(f"\n# Sume {k} veces fila {i+1} a la fila {j+1}")
                     print_matrix(x, affected_rows=[j])
         i += 1
 
@@ -245,7 +248,6 @@ def row_echelon_form(a, solve_system=False):
     print("\n# El rango de la matriz escalonada es:", rango)
 
     if solve_system:
-        # Print the solutions
         print("\n# Soluciones del sistema:")
         for i in range(min(m, n)):
             if i < m:
@@ -262,7 +264,7 @@ def input_augmented_matrix(matrix):
     mensaje = mensaje_padding("Resolver sistema")
     console.print(mensaje)
 
-    # Input the augmented matrix
+    # ingresar valores
     a = symbols("_")
     augmented_matrix = [a] * rows
     matrix = matrix.row_join(Matrix(augmented_matrix))
@@ -286,7 +288,7 @@ def input_augmented_matrix(matrix):
 
 
 def print_matrix_and_inverse(x):
-    # Calculate the inverse of the matrix
+    # sacar inversa
     inverse = gauss_jordan_inverse(x)
 
     # Convert the matrices to lists of strings for easier printing
