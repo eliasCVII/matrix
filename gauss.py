@@ -15,11 +15,14 @@ def mensaje_padding(message):
     """
     theme = "italic blue on white"
     length = len(message)
-    mensaje = Padding(f"> {message}", (0, 15), style=theme, expand=False)
+    mensaje = Padding(f"> {message}", (0, 15), style=theme, expand=True)
     return mensaje
 
 
 def input_positive_integer(prompt):
+    """
+    Tomar valores del usuario
+    """
     while True:
         # value = int(input(prompt))
         value = IntPrompt.ask(prompt)
@@ -100,12 +103,6 @@ def print_matrix(x, affected_rows=None, is_augmented=False, highlight_pos=None):
             row_str.append(f"[{color}]{val.rjust(max_widths[j])}[/{color}]")
         # console.print("[" + ", ".join(row_str) + "]")
         console.print("[" + ", ".join(row_str).replace("|,", "|") + "]")
-
-
-def multiply_matrix(x, y):
-    if x.shape[1] != y.shape[0]:
-        return 0
-    return x * y
 
 
 # def escalonar_simple(x):
@@ -225,7 +222,7 @@ def row_echelon_form(a, solve_system=False):
 
         # Hacer el pivote 1
         pivot = x[i, i]
-        if pivot != 1:  # salatar si ya es 1
+        if pivot != 1:  # saltar si ya es 1
             x[i, :] = x[i, :] / pivot
             print(f"\n# f{i+1} = ({pivot**-1})f{i+1}")
             # print(f"\n# Multiplique la fila {i+1} por {pivot**-1}")
@@ -254,8 +251,6 @@ def row_echelon_form(a, solve_system=False):
                 console.print(f"- x_{i+1} = {x[i, n-1]}", style="bold")
             else:
                 console.print(f"- x_{i+1} es una variable libre")
-
-    # return x
 
 
 def input_augmented_matrix(matrix):
@@ -291,18 +286,17 @@ def print_matrix_and_inverse(x):
     # sacar inversa
     inverse = gauss_jordan_inverse(x)
 
-    # Convert the matrices to lists of strings for easier printing
+    # pasar a lista
     x = [[str(val) for val in row] for row in x.tolist()]
     inverse = [[str(val) for val in row] for row in inverse.tolist()]
 
-    # Find the maximum width of the numbers in each column for both matrices
+    # sacar el ancho
     max_widths_x = [max(len(x[i][j]) for i in range(len(x))) for j in range(len(x[0]))]
     max_widths_inverse = [
         max(len(inverse[i][j]) for i in range(len(inverse)))
         for j in range(len(inverse[0]))
     ]
 
-    # Print the matrices side by side
     console.print("\n# Resultado final:", style="italic white on blue")
     for i in range(len(x)):
         row_x = [val.rjust(max_widths_x[j]) for j, val in enumerate(x[i])]
@@ -323,28 +317,6 @@ def print_matrix_and_inverse(x):
             )
 
 
-def print_matrices_side_by_side(x, y):
-    # Convert the matrices to lists
-    x_list = x.tolist()
-    y_list = y.tolist()
-
-    # Get the dimensions of the matrices
-    x_rows, x_cols = len(x_list), len(x_list[0])
-    y_rows, y_cols = len(y_list), len(y_list[0])
-
-    # Print the matrices side by side
-    print("\n# [X] * [Y]:")
-    for i in range(max(x_rows, y_rows)):
-        if i < x_rows:
-            x_row = x_list[i]
-            print(f"{x_row}", end=" ")
-        if i < y_rows:
-            y_row = y_list[i]
-            print(f"{y_row}")
-        else:
-            print()
-
-
 def matrix_from_file(theme_2):
     console.clear()
     filename = "matrix.json"
@@ -353,7 +325,7 @@ def matrix_from_file(theme_2):
             data = json.load(f)
             matrices = data["matrices"]
     except FileNotFoundError:
-        print("file not found", style="red")
+        print("Archivo no encontrado", style="red")
 
     archivo = mensaje_padding(filename)
     print(archivo)
@@ -367,6 +339,7 @@ def matrix_from_file(theme_2):
     x = Matrix(matrices[matrix_choice])
 
     console.clear()
+    print("\n")
     console.print(f"Su matriz ({x.shape[0]}x{x.shape[1]}):", style=theme_2)
     print_matrix(x)
 
@@ -382,7 +355,6 @@ def main():
         print(welcome)
         print("1. Insertar matriz manualmente")
         print("2. Leer matrices desde archivo")
-        # print("3. Ingresar sistemas de ecuaciones")
         print("3. Salir")
         choice = Prompt.ask("Elija una opcion", choices=["1", "2", "3"])
 
@@ -392,7 +364,7 @@ def main():
 
         if choice == "1":
             console.clear()
-            manual = mensaje_padding("ingreso manual")
+            manual = mensaje_padding("Ingreso manual")
             console.print(manual)
             x = input_matrix()
 
